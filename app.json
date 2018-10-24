@@ -1,12 +1,12 @@
 {
   "pages": [
+    "pages/userLogin/login",
+    "pages/mine/mine",
     "pages/userRegist/regist",
     "pages/index/index",
     "pages/videoinfo/videoinfo",
     "pages/videotest/videotest",
-    "pages/userLogin/login",
     "pages/report/report",
-    "pages/mine/mine",
     "pages/chooseBgm/chooseBgm",
     "pages/searchVideo/searchVideo"
   ],
@@ -15,5 +15,6 @@
     "navigationBarBackgroundColor": "#fff",
     "navigationBarTitleText": "Shaker Shaker",
     "navigationBarTextStyle": "black"
-  }
+  },
+  "debug":true
 }
