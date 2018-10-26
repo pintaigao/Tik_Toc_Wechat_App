@@ -1,66 +1,90 @@
 // pages/chooseBgm/chooseBgm.js
+
+const app = getApp();
 Page({
-
-  /**
-   * 页面的初始数据
-   */
   data: {
-
+    bgmList: [],
+    serverUrl: "",
+    videoParams: {}
   },
 
-  /**
-   * 生命周期函数--监听页面加载
-   */
-  onLoad: function (options) {
+  onLoad: function (params) {
+    let me = this;
 
+    me.setData({
+      videoParams: params,
+    })
+    let user = app.userInfo;
+    let serverUrl = app.serverUrl;
+    wx.showLoading({
+      title: '请等待...',
+    })
+    wx.request({
+      url: serverUrl + "/bgm/list",
+      method: 'POST', // OPTIONS, GET, HEAD, POST, PUT, DELETE, TRACE, CONNECT
+      header: {
+        'content-type': 'application/json'
+      }, // 设置请求的 header
+      success: function (res) {
+        console.log(res);
+        wx.hideLoading();
+        if (res.data.status == 200) {
+          let bgmList = res.data.data;
+          me.setData({
+            bgmList: bgmList,
+            serverUrl: serverUrl
+          });
+        }
+      }
+    })
   },
+  upload: function (e) {
+    let me = this;
+    let bgmId = e.detail.value.bgmId;
+    let desc = e.detail.value.desc;
 
-  /**
-   * 生命周期函数--监听页面初次渲染完成
-   */
-  onReady: function () {
+    let duration = me.data.videoParams.duration;
+    let tmpHeight = me.data.videoParams.tmpHeight;
+    let tmpWidth = me.data.videoParams.tmpWidth;
+    let tmpVideoUrl = me.data.videoParams.tmpVideoUrl;
+    let tmpCoverUrl = me.data.videoParams.tmpCoverUrl;
 
-  },
+    // 上传短视频
+    wx.showLoading({
+      title: '上传中'
+    })
+    let serverUrl = app.serverUrl;
 
-  /**
-   * 生命周期函数--监听页面显示
-   */
-  onShow: function () {
-
-  },
-
-  /**
-   * 生命周期函数--监听页面隐藏
-   */
-  onHide: function () {
-
-  },
-
-  /**
-   * 生命周期函数--监听页面卸载
-   */
-  onUnload: function () {
-
-  },
-
-  /**
-   * 页面相关事件处理函数--监听用户下拉动作
-   */
-  onPullDownRefresh: function () {
-
-  },
-
-  /**
-   * 页面上拉触底事件的处理函数
-   */
-  onReachBottom: function () {
-
-  },
-
-  /**
-   * 用户点击右上角分享
-   */
-  onShareAppMessage: function () {
-
+    wx.uploadFile({
+      url: serverUrl + "/video/upload",
+      formData:{
+        userId: app.userInfo.id,
+        bgmId: bgmId,
+        desc:desc,
+        videoSeconds:duration,
+        videoHeight:tmpHeight,
+        videoWidth:tmpWidth
+      },
+      filePath: tmpVideoUrl,
+      name: 'file',
+      header: {
+        'content-type': 'application/json'
+      }, // 设置请求的 header
+      success: function (res) {
+        wx.hideLoading();
+        if (res.data.status == 200) {
+          wx.showToast({
+            title: '上传成功',
+            icon: 'success'
+          })
+        }
+      },
+      fail: function () {
+        // fail
+      },
+      complete: function () {
+        // complete
+      }
+    })
   }
 })
