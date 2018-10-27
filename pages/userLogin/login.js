@@ -50,7 +50,7 @@ Page({
               icon:'success',
               duration:2000
             });
-            app.userInfo = res.data.data;
+            app.setGlobalUserInfo(res.data.data);
             wx.navigateTo({
               url: '../mine/mine',
               success: function (res) {

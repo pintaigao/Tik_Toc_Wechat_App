@@ -1,2 +1,2 @@
 <!--pages/searchVideo/searchVideo.wxml-->
-<text>pages/searchVideo/searchVideo.wxml</text>
+<include src = "../../wxSearchView/wxSearchView.wxml"/>

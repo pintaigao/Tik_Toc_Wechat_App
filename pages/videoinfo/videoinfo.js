@@ -1,3 +1,6 @@
+let videoUtil = require("../../utils/videoUtils.js")
+
+const app = getApp();
 // pages/videoinfo/videoinfo.js
 Page({
 
@@ -5,62 +8,51 @@ Page({
    * 页面的初始数据
    */
   data: {
+    cover: "cover",
+    videoId: "",
+    src: "",
+    videoInfo: {}
+  },
+
+  videoCtx: {},
+
+  onLoad: function(params) {
+    let me = this;
+    me.videoCtx = wx.createVideoContext("myVideo", me);
+    // 获取上一个页面传入的参数
+    let videoInfo = JSON.parse(params.videoInfo);
+    me.setData({
+      videoId: videoInfo.id,
+      src: app.serverUrl + videoInfo.videoPath,
+      videoInfo: videoInfo
+    })
 
   },
 
-  /**
-   * 生命周期函数--监听页面加载
-   */
-  onLoad: function (options) {
-
+  onShow: function() {
+    let me = this;
+    me.videoCtx.play()
   },
 
-  /**
-   * 生命周期函数--监听页面初次渲染完成
-   */
-  onReady: function () {
-
+  onHide: function() {
+    let me = this;
+    me.videoCtx.pause()
   },
 
-  /**
-   * 生命周期函数--监听页面显示
-   */
-  onShow: function () {
-
+  showSearch: function() {
+    wx.navigateTo({
+      url: '../searchVideo/searchVideo',
+    })
   },
 
-  /**
-   * 生命周期函数--监听页面隐藏
-   */
-  onHide: function () {
-
+  upload: function() {
+    videoUtil.uploadVideo();
   },
 
-  /**
-   * 生命周期函数--监听页面卸载
-   */
-  onUnload: function () {
-
-  },
-
-  /**
-   * 页面相关事件处理函数--监听用户下拉动作
-   */
-  onPullDownRefresh: function () {
-
-  },
-
-  /**
-   * 页面上拉触底事件的处理函数
-   */
-  onReachBottom: function () {
-
-  },
-
-  /**
-   * 用户点击右上角分享
-   */
-  onShareAppMessage: function () {
-
+  // 点击home健
+  showIndex: function(){
+    wx.redirectTo({
+      url: '../index/index',
+    })
   }
 })

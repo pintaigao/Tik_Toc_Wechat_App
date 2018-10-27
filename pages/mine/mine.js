@@ -1,3 +1,4 @@
+let videoUtil = require("../../utils/videoUtils.js")
 // pages/mine/mine.js
 const app = getApp();
 
@@ -13,9 +14,9 @@ Page({
   /**
    * 生命周期函数--监听页面加载
    */
-  onLoad: function (options) {
+  onLoad: function(options) {
     let me = this;
-    let user = app.userInfo;
+    let user = app.getGlobalUserInfo();
     let serverUrl = app.serverUrl;
     wx.showLoading({
       title: '请等待...',
@@ -26,7 +27,7 @@ Page({
       header: {
         'content-type': 'application/json'
       }, // 设置请求的 header
-      success: function (res) {
+      success: function(res) {
         wx.hideLoading();
         if (res.data.status == 200) {
           let userInfo = res.data.data;
@@ -43,16 +44,16 @@ Page({
           })
         }
       },
-      fail: function () {
+      fail: function() {
         // fail
       },
-      complete: function () {
+      complete: function() {
         // complete
       }
     })
   },
-  logout: function (e) {
-    let user = app.userInfo;
+  logout: function(e) {
+    let user = app.getGlobalUserInfo();
     let serverUrl = app.serverUrl;
     wx.showLoading({
       title: '请等待',
@@ -65,7 +66,7 @@ Page({
       header: {
         'content-type': "application/json"
       },
-      success: function (res) {
+      success: function(res) {
         console.log(res);
         wx.hideLoading();
         if (res.data.status == 200) {
@@ -74,7 +75,7 @@ Page({
             icon: "success",
             duration: 2000
           })
-          app.userInfo = null;
+          wx.removeStorageSync("userInfo");
           wx.navigateTo({
             url: '../userLogin/login',
           })
@@ -83,28 +84,28 @@ Page({
     })
   },
   // 上传图像
-  changeFace: function () {
+  changeFace: function() {
     let me = this;
     wx.chooseImage({
       count: 1, // 最多可以选择的图片张数，默认9
       sizeType: ['compressed'], // original 原图，compressed 压缩图，默认二者都有
       sourceType: ['album'], // album 从相册选图，camera 使用相机，默认二者都有
-      success: function (res) {
+      success: function(res) {
         let tempFilePaths = res.tempFilePaths;
         console.log(tempFilePaths);
         wx.showLoading({
           title: '上传中'
         })
         let serverUrl = app.serverUrl;
-
+        let user = app.getGlobalUserInfo();
         wx.uploadFile({
-          url: serverUrl + "/user/uploadFace?userId=" + app.userInfo.id,
+          url: serverUrl + "/user/uploadFace?userId=" + user.id,
           filePath: tempFilePaths[0],
           name: 'file',
           header: {
             'content-type': 'application/json'
           }, // 设置请求的 header
-          success: function (res) {
+          success: function(res) {
             console.log(res)
             let data = JSON.parse(res.data);
             wx.hideLoading();
@@ -127,33 +128,33 @@ Page({
               })
             }
           },
-          fail: function () {
+          fail: function() {
             // fail
           },
-          complete: function () {
+          complete: function() {
             // complete
           }
         })
 
       },
-      fail: function () {
+      fail: function() {
         // fail
       },
-      complete: function () {
+      complete: function() {
         // complete
       }
     })
 
   },
 
-  uploadVideo: function () {
-
+  uploadVideo: function() {
+    // videoUtil.uploadVideo();
     let me = this;
 
     wx.chooseVideo({
       sourceType: ['album'], // album 从相册选视频，camera 使用相机拍摄
       // maxDuration: 60, // 拍摄视频最长拍摄时间，单位秒。最长支持60秒
-      success: function (res) {
+      success: function(res) {
         console.log()
 
         let duration = res.duration;
@@ -177,11 +178,11 @@ Page({
         } else {
           // TODO 打开选择BGM的页面
           wx.navigateTo({
-            url: '../chooseBgm/chooseBgm?duration=' + duration 
-            + "&tmpHeight=" + tmpHeight
-            + "&tmpWidth=" + tmpWidth
-            + "&tmpVideoUrl=" + tmpVideoUrl
-            + "&tmpCoverUrl=" + tmpCoverUrl
+            url: '../chooseBgm/chooseBgm?duration=' + duration +
+              "&tmpHeight=" + tmpHeight +
+              "&tmpWidth=" + tmpWidth +
+              "&tmpVideoUrl=" + tmpVideoUrl +
+              "&tmpCoverUrl=" + tmpCoverUrl
           })
         }
       },

@@ -1,54 +1,114 @@
-//index.js
-//获取应用实例
 const app = getApp()
 
 Page({
   data: {
-    motto: 'Hello World',
-    userInfo: {},
-    hasUserInfo: false,
-    canIUse: wx.canIUse('button.open-type.getUserInfo')
+    // 用于分页的属性
+    total:1,
+    page:1,
+    videoList:[],
+    screenWidth: 350,
+    serverUrl:"",
+    searchContent:"",
   },
-  //事件处理函数
-  bindViewTap: function() {
-    wx.navigateTo({
-      url: '../logs/logs'
+
+  onLoad: function (params) {
+    var me = this;
+    var screenWidth = wx.getSystemInfoSync().screenWidth;
+    me.setData({
+      screenWidth: screenWidth,
+    });
+
+    let searchContent = params.search;
+    let isSaveRecord = params.isSaveRecord;
+
+    if(isSaveRecord == null || isSaveRecord == "" || isSaveRecord == undefined) {
+      isSaveRecord = 0;
+    }
+
+    me.setData({
+      searchContent:searchContent
     })
+
+    // 获取当前的分页数
+    let page = me.data.page;
+    me.getAllVideoList(page,isSaveRecord);
+   
   },
-  onLoad: function () {
-    if (app.globalData.userInfo) {
-      this.setData({
-        userInfo: app.globalData.userInfo,
-        hasUserInfo: true
+
+  // 上拉刷新
+  onReachBottom:function(){
+    let me = this;
+    let currentPage = me.data.page;
+    let totaPage = me.data.totalPage;
+    // 判断当前页数和总页数是否相等，如果相等则无需查询
+    if(currentPage === totaPage){
+      wx.showToast({
+        title: '已经没有视频了',
+        icon:"none"
       })
-    } else if (this.data.canIUse){
-      // 由于 getUserInfo 是网络请求，可能会在 Page.onLoad 之后才返回
-      // 所以此处加入 callback 以防止这种情况
-      app.userInfoReadyCallback = res => {
-        this.setData({
-          userInfo: res.userInfo,
-          hasUserInfo: true
+      return;
+    }
+
+    let page = currentPage + 1;
+
+    me.getAllVideoList(page,0);
+  },
+
+  // 下拉刷新
+  onPullDownRefresh: function(){
+    wx.showNavigationBarLoading();
+    this.getAllVideoList(1,0);
+  },
+
+
+  getAllVideoList: function (page, isSaveRecord){
+    let me = this;
+    let serverUrl = app.serverUrl;
+    wx.showLoading({
+      title: '请等待，加载中',
+    });
+
+    let searchContent = me.data.searchContent;
+    wx.request({
+      url: serverUrl + '/video/showAll?page=' + page + "&isSaveRecord="+ isSaveRecord,
+      data:{
+        videoDesc:searchContent
+      },
+      method: "POST",
+      success: function (res) {
+        wx.hideLoading();
+        wx.hideNavigationBarLoading();
+        wx.stopPullDownRefresh();
+        // 判断当前页page是否是第一页，如果是第一页，那么设置videoList为空
+        if (page === 1) {
+          me.setData({
+            videoList: []
+          });
+        }
+
+        let videoList = res.data.data.rows;
+
+        let newVideoList = me.data.videoList;
+
+        me.setData({
+          videoList: newVideoList.concat(videoList),
+          page: page,
+          totalPage: res.data.data.total,
+          serverUrl: serverUrl
         })
       }
-    } else {
-      // 在没有 open-type=getUserInfo 版本的兼容处理
-      wx.getUserInfo({
-        success: res => {
-          app.globalData.userInfo = res.userInfo
-          this.setData({
-            userInfo: res.userInfo,
-            hasUserInfo: true
-          })
-        }
-      })
-    }
+    })
   },
-  getUserInfo: function(e) {
-    console.log(e)
-    app.globalData.userInfo = e.detail.userInfo
-    this.setData({
-      userInfo: e.detail.userInfo,
-      hasUserInfo: true
+
+  showVideoInfo:function(e){
+    let me = this;
+    let videoList = me.data.videoList;
+    let arrindex = e.target.dataset.arrindex; 
+    let videoInfo = JSON.stringify(videoList[arrindex]);
+
+    wx.redirectTo({
+      url:"../videoinfo/videoinfo?videoInfo="+videoInfo
     })
   }
+
 })

@@ -14,8 +14,8 @@ Page({
     me.setData({
       videoParams: params,
     })
-    let user = app.userInfo;
     let serverUrl = app.serverUrl;
+    let userInfo = app.getGlobalUserInfo();
     wx.showLoading({
       title: '请等待...',
     })
@@ -38,6 +38,7 @@ Page({
       }
     })
   },
+
   upload: function (e) {
     let me = this;
     let bgmId = e.detail.value.bgmId;
@@ -54,11 +55,11 @@ Page({
       title: '上传中'
     })
     let serverUrl = app.serverUrl;
-
+    let userInfo = app.getGlobalUserInfo()
     wx.uploadFile({
       url: serverUrl + "/video/upload",
       formData:{
-        userId: app.userInfo.id,
+        userId: userInfo.id,
         bgmId: bgmId,
         desc:desc,
         videoSeconds:duration,
@@ -71,20 +72,17 @@ Page({
         'content-type': 'application/json'
       }, // 设置请求的 header
       success: function (res) {
+
+        let data = JSON.parse(res.data)
         wx.hideLoading();
-        if (res.data.status == 200) {
+        if (data.status == 200) {
           wx.showToast({
             title: '上传成功',
-            icon: 'success'
+            icon:"success"
           })
+
         }
       },
-      fail: function () {
-        // fail
-      },
-      complete: function () {
-        // complete
-      }
     })
   }
 })
